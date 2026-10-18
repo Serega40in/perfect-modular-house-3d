@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Самый Прекрасный Модульный Дом во Вселенной</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            overflow: hidden;
+            background: linear-gradient(to bottom, #87CEEB, #E0F7FA);
+            font-family: 'Segoe UI', system-ui, sans-serif;
+        }
+        #info {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: white;
+            background: rgba(0,0,0,0.6);
+            padding: 15px 25px;
+            border-radius: 16px;
+            backdrop-filter: blur(10px);
+            z-index: 100;
+            max-width: 380px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+        }
+        #info h1 {
+            font-size: 1.4rem;
+            margin-bottom: 8px;
+            background: linear-gradient(90deg, #FFD700, #FF6B6B, #4ECDC4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        #info p { font-size: 0.9rem; line-height: 1.4; opacity: 0.95; }
+        #controls {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 12px;
+            z-index: 100;
+        }
+        button {
+            background: rgba(255,255,255,0.9);
+            border: none;
+            padding: 12px 22px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.95rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+        }
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+            background: white;
+        }
+        #loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 1.5rem;
+            z-index: 200;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+        }
+    </style>
+</head>
+<body>
+    <div id="loading">Создаём самое прекрасное...</div>
+    <div id="info">
+        <h1>✨ Совершенный Модульный Дом</h1>
+        <p>Архитектура мечты: органичные формы, живые материалы, свет, цвет и гармония с природой. Улица, полная жизни и красоты.</p>
+        <p style="margin-top:8px; font-size:0.8rem; opacity:0.8;">🖱️ Перетаскивайте мышью • 🔍 Колёсико — зум • ⌨️ WASD — движение</p>
+    </div>
+    <div id="controls">
+        <button onclick="resetCamera()">🏠 Вид с улицы</button>
+        <button onclick="toggleDayNight()">🌙 День / Ночь</button>
+        <button onclick="flyAround()">🎬 Облёт</button>
+    </div>
+
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+            "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+        }
+    }
+    </script>
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+        import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
+
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x87CEEB);
+        scene.fog = new THREE.FogExp2(0xE0F7FA, 0.012);
+
+        const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.set(18, 12, 22);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        renderer.toneMappingExposure = 1.15;
+        document.body.appendChild(renderer.domElement);
+
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.05;
+        controls.maxPolarAngle = Math.PI / 2.1;
+        controls.minDistance = 5;
+        controls.maxDistance = 60;
+        controls.target.set(0, 3, 0);
+
+        // === LIGHTS ===
+        const ambient = new THREE.AmbientLight(0xffffff, 0.45);
+        scene.add(ambient);
+
+        const sun = new THREE.DirectionalLight(0xfff5e0, 1.4);
+        sun.position.set(25, 40, 15);
+        sun.castShadow = true;
+        sun.shadow.mapSize.set(2048, 2048);
+        sun.shadow.camera.near = 1;
+        sun.shadow.camera.far = 100;
+        sun.shadow.camera.left = -30;
+        sun.shadow.camera.right = 30;
+        sun.shadow.camera.top = 30;
+        sun.shadow.camera.bottom = -30;
+        sun.shadow.bias = -0.0001;
+        scene.add(sun);
+
+        const fill = new THREE.DirectionalLight(0xa0d8ff, 0.35);
+        fill.position.set(-15, 10, -10);
+        scene.add(fill);
+
+        // Warm interior glow
+        const warmLight = new THREE.PointLight(0xffaa55, 1.2, 25);
+        warmLight.position.set(0, 4, 0);
+        scene.add(warmLight);
+
+        // === GROUND & STREET ===
+        const groundGeo = new THREE.PlaneGeometry(120, 120);
+        const groundMat = new THREE.MeshStandardMaterial({ 
+            color: 0x4a7c59, 
+            roughness: 0.9,
+            metalness: 0.05
+        });
+        const ground = new THREE.Mesh(groundGeo, groundMat);
+        ground.rotation.x = -Math.PI / 2;
+        ground.receiveShadow = true;
+        scene.add(ground);
+
+        // Paved street
+        const streetGeo = new THREE.PlaneGeometry(12, 80);
+        const streetMat = new THREE.MeshStandardMaterial({ color: 0x555555, roughness: 0.7 });
+        const street = new THREE.Mesh(streetGeo, streetMat);
+        street.rotation.x = -Math.PI / 2;
+        street.position.set(0, 0.02, 15);
+        street.receiveShadow = true;
+        scene.add(street);
+
+        // Sidewalks
+        const sidewalkMat = new THREE.MeshStandardMaterial({ color: 0xc8c0b0, roughness: 0.85 });
+        [-7.5, 7.5].forEach(x => {
+            const sw = new THREE.Mesh(new THREE.PlaneGeometry(3, 80), sidewalkMat);
+            sw.rotation.x = -Math.PI / 2;
+            sw.position.set(x, 0.03, 15);
+            sw.receiveShadow = true;
+            scene.add(sw);
+        });
+
+        // === MATERIALS ===
+        const whiteWall = new THREE.MeshStandardMaterial({ color: 0xf8f4ef, roughness: 0.75, metalness: 0.05 });
+        const wood = new THREE.MeshStandardMaterial({ color: 0xc4a484, roughness: 0.6, metalness: 0.1 });
+        const darkWood = new THREE.MeshStandardMaterial({ color: 0x5d4037, roughness: 0.55 });
+        const glass = new THREE.MeshPhysicalMaterial({ 
+            color: 0xa8d8ea, 
+            transparent: true, 
+            opacity: 0.55, 
+            roughness: 0.05, 
+            metalness: 0.1,
+            transmission: 0.7,
+            thickness: 0.5
+        });
+        const purpleGlass = new THREE.MeshPhysicalMaterial({ 
+            color: 0xc9a0dc, 
+            transparent: true, 
+            opacity: 0.45, 
+            roughness: 0.1,
+            transmission: 0.6
+        });
+        const gold = new THREE.MeshStandardMaterial({ color: 0xd4af37, metalness: 0.8, roughness: 0.25 });
+        const greenRoof = new THREE.MeshStandardMaterial({ color: 0x2e8b57, roughness: 0.7 });
+        const terracotta = new THREE.MeshStandardMaterial({ color: 0xe07a5f, roughness: 0.65 });
+        const softPink = new THREE.MeshStandardMaterial({ color: 0xf2d0c8, roughness: 0.7 });
+        const teal = new THREE.MeshStandardMaterial({ color: 0x4ecdc4, roughness: 0.5 });
+
+        // === HOUSE STRUCTURE (inspired by the sketch) ===
+        const house = new THREE.Group();
+
+        // Main volume - left part of sketch
+        const mainBody = new THREE.Mesh(new RoundedBoxGeometry(10, 5.5, 8, 4, 0.15), whiteWall);
+        mainBody.position.set(-3, 2.75, 0);
+        mainBody.castShadow = true;
+        mainBody.receiveShadow = true;
+        house.add(mainBody);
+
+        // Right wing (hatched purple area - glass / living)
+        const rightWing = new THREE.Mesh(new RoundedBoxGeometry(7, 4.8, 7, 4, 0.12), softPink);
+        rightWing.position.set(5.5, 2.4, 0.5);
+        rightWing.castShadow = true;
+        house.add(rightWing);
+
+        // Central connector / corridor
+        const connector = new THREE.Mesh(new RoundedBoxGeometry(3, 3.8, 5, 3, 0.1), wood);
+        connector.position.set(1.5, 1.9, 0);
+        connector.castShadow = true;
+        house.add(connector);
+
+        // Upper floor / loft module
+        const upper = new THREE.Mesh(new RoundedBoxGeometry(6, 2.8, 6, 3, 0.12), whiteWall);
+        upper.position.set(-2, 6.4, 0);
+        upper.castShadow = true;
+        house.add(upper);
+
+        // Roof modules - green living roofs
+        const roof1 = new THREE.Mesh(new RoundedBoxGeometry(10.4, 0.35, 8.4, 2, 0.05), greenRoof);
+        roof1.position.set(-3, 5.6, 0);
+        roof1.castShadow = true;
+        house.add(roof1);
+
+        const roof2 = new THREE.Mesh(new RoundedBoxGeometry(7.4, 0.3, 7.4, 2, 0.05), greenRoof);
+        roof2.position.set(5.5, 4.95, 0.5);
+        house.add(roof2);
+
+        // Skylights
+        const skylightGeo = new THREE.BoxGeometry(2.2, 0.15, 2.2);
+        [-4, -1].forEach(x => {
+            const sk = new THREE.Mesh(skylightGeo, glass);
+            sk.position.set(x, 5.75, 0);
+            house.add(sk);
+        });
+
+        // Large glass facade (purple hatched inspiration)
+        const facadeGlass = new THREE.Mesh(new THREE.BoxGeometry(6.5, 4.2, 0.15), purpleGlass);
+        facadeGlass.position.set(5.5, 2.3, 4.1);
+        house.add(facadeGlass);
+
+        // Window frames
+        function addWindow(x, y, z, w, h, rotY = 0) {
+            const frame = new THREE.Mesh(new THREE.BoxGeometry(w + 0.15, h + 0.15, 0.12), darkWood);
+            frame.position.set(x, y, z);
+            frame.rotation.y = rotY;
+            house.add(frame);
+            const pane = new THREE.Mesh(new THREE.BoxGeometry(w, h, 0.08), glass);
+            pane.position.set(x, y, z + (rotY === 0 ? 0.05 : 0));
+            pane.rotation.y = rotY;
+            house.add(pane);
+        }
+
+        // Windows on main body
+        addWindow(-6.1, 3.2, 2.5, 1.8, 2.2, Math.PI/2);
+        addWindow(-6.1, 3.2, -2.5, 1.8, 2.2, Math.PI/2);
+        addWindow(-3, 3.5, 4.1, 2.5, 2.5);
+        addWindow(-1, 3.5, 4.1, 1.8, 2.2);
+
+        // Upper windows
+        addWindow(-2, 6.8, 3.1, 2.2, 1.5);
+        addWindow(-4, 6.8, 3.1, 1.6, 1.5);
+
+        // Entrance
+        const doorFrame = new THREE.Mesh(new THREE.BoxGeometry(1.8, 2.8, 0.2), darkWood);
+        doorFrame.position.set(1.5, 1.4, 2.6);
+        house.add(doorFrame);
+        const door = new THREE.Mesh(new THREE.BoxGeometry(1.5, 2.5, 0.12), wood);
+        door.position.set(1.5, 1.25, 2.7);
+        house.add(door);
+
+        // Balcony
+        const balcony = new THREE.Mesh(new RoundedBoxGeometry(4, 0.18, 1.6, 2, 0.05), wood);
+        balcony.position.set(-2, 5.7, 4.2);
+        balcony.castShadow = true;
+        house.add(balcony);
+        // Balcony railing
+        for (let i = -1.7; i <= 1.7; i += 0.45) {
+            const post = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.9), gold);
+            post.position.set(-2 + i, 6.15, 4.85);
+            house.add(post);
+        }
+        const rail = new THREE.Mesh(new THREE.BoxGeometry(3.8, 0.06, 0.06), gold);
+        rail.position.set(-2, 6.55, 4.85);
+        house.add(rail);
+
+        // Colorful modular accents
+        const accent1 = new THREE.Mesh(new RoundedBoxGeometry(1.5, 1.5, 1.5, 2, 0.1), teal);
+        accent1.position.set(8.2, 1.5, -2);
+        accent1.castShadow = true;
+        house.add(accent1);
+
+        const accent2 = new THREE.Mesh(new RoundedBoxGeometry(1.2, 2.2, 1.2, 2, 0.08), terracotta);
+        accent2.position.set(-7.5, 2.2, 1.5);
+        accent2.castShadow = true;
+        house.add(accent2);
+
+        // Chimney / ventilation sculpture
+        const chimney = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.45, 2.2, 8), terracotta);
+        chimney.position.set(6.5, 6.2, -1.5);
+        chimney.castShadow = true;
+        house.add(chimney);
+
+        scene.add(house);
+
+        // === TREES & NATURE ===
+        function createTree(x, z, scale = 1) {
+            const trunk = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.25 * scale, 0.35 * scale, 2.5 * scale, 8),
+                darkWood
+            );
+            trunk.position.set(x, 1.25 * scale, z);
+            trunk.castShadow = true;
+            scene.add(trunk);
+
+            const foliageMat = new THREE.MeshStandardMaterial({ 
+                color: new THREE.Color().setHSL(0.33 + Math.random() * 0.08, 0.6, 0.35 + Math.random() * 0.1),
+                roughness: 0.8
+            });
+            const foliage = new THREE.Mesh(
+                new THREE.IcosahedronGeometry(1.8 * scale, 1),
+                foliageMat
+            );
+            foliage.position.set(x, 3.5 * scale, z);
+            foliage.castShadow = true;
+            scene.add(foliage);
+
+            // Second layer
+            const foliage2 = new THREE.Mesh(
+                new THREE.IcosahedronGeometry(1.3 * scale, 1),
+                foliageMat
+            );
+            foliage2.position.set(x + 0.4, 4.2 * scale, z - 0.3);
+            foliage2.castShadow = true;
+            scene.add(foliage2);
+        }
+
+        // Beautiful street trees
+        createTree(-12, 8, 1.3);
+        createTree(-11, 18, 1.1);
+        createTree(12, 10, 1.4);
+        createTree(13, 20, 1.0);
+        createTree(-14, -5, 1.2);
+        createTree(14, -3, 1.15);
+        createTree(-9, 28, 0.9);
+        createTree(10, 30, 1.1);
+
+        // Flower beds
+        function createFlowerBed(x, z, color) {
+            const bed = new THREE.Mesh(
+                new THREE.CylinderGeometry(1.2, 1.4, 0.3, 12),
+                new THREE.MeshStandardMaterial({ color: 0x5d4037 })
+            );
+            bed.position.set(x, 0.15, z);
+            bed.castShadow = true;
+            scene.add(bed);
+
+            for (let i = 0; i < 12; i++) {
+                const flower = new THREE.Mesh(
+                    new THREE.SphereGeometry(0.15 + Math.random() * 0.1, 8, 8),
+                    new THREE.MeshStandardMaterial({ color: color, roughness: 0.6 })
+                );
+                const angle = (i / 12) * Math.PI * 2;
+                flower.position.set(
+                    x + Math.cos(angle) * 0.7,
+                    0.4 + Math.random() * 0.3,
+                    z + Math.sin(angle) * 0.7
+                );
+                scene.add(flower);
+            }
+        }
+
+        createFlowerBed(-8, 6, 0xff6b6b);
+        createFlowerBed(9, 7, 0xffd93d);
+        createFlowerBed(-7, -6, 0xc44569);
+        createFlowerBed(8, -5, 0x6bcb77);
+
+        // === STREET LAMPS ===
+        function createLamp(x, z) {
+            const pole = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.08, 0.1, 4.5, 8),
+                new THREE.MeshStandardMaterial({ color: 0x333333, metalness: 0.7 })
+            );
+            pole.position.set(x, 2.25, z);
+            pole.castShadow = true;
+            scene.add(pole);
+
+            const head = new THREE.Mesh(
+                new THREE.SphereGeometry(0.35, 16, 16),
+                new THREE.MeshStandardMaterial({ color: 0xfff5e0, emissive: 0xffaa33, emissiveIntensity: 0.3 })
+            );
+            head.position.set(x, 4.6, z);
+            scene.add(head);
+
+            const light = new THREE.PointLight(0xffcc77, 0.8, 12);
+            light.position.set(x, 4.5, z);
+            scene.add(light);
+        }
+
+        createLamp(-6.5, 12);
+        createLamp(6.5, 12);
+        createLamp(-6.5, 25);
+        createLamp(6.5, 25);
+
+        // === PATH TO HOUSE ===
+        const path = new THREE.Mesh(
+            new THREE.PlaneGeometry(3, 8),
+            new THREE.MeshStandardMaterial({ color: 0xd4c4a8, roughness: 0.8 })
+        );
+        path.rotation.x = -Math.PI / 2;
+        path.position.set(1.5, 0.04, 7);
+        path.receiveShadow = true;
+        scene.add(path);
+
+        // === CLOUDS (simple) ===
+        const cloudMat = new THREE.MeshStandardMaterial({ color: 0xffffff, transparent: true, opacity: 0.85 });
+        function createCloud(x, y, z, s = 1) {
+            const g = new THREE.Group();
+            for (let i = 0; i < 5; i++) {
+                const c = new THREE.Mesh(new THREE.SphereGeometry(1.2 * s * (0.7 + Math.random()*0.5), 8, 8), cloudMat);
+                c.position.set((Math.random()-0.5)*3*s, (Math.random()-0.5)*0.8, (Math.random()-0.5)*2*s);
+                g.add(c);
+            }
+            g.position.set(x, y, z);
+            scene.add(g);
+            return g;
+        }
+        createCloud(-20, 18, -15, 2);
+        createCloud(25, 22, -10, 2.5);
+        createCloud(5, 25, -25, 1.8);
+
+        // === INTERACTION ===
+        let isNight = false;
+        window.toggleDayNight = function() {
+            isNight = !isNight;
+            if (isNight) {
+                scene.background = new THREE.Color(0x0a1628);
+                scene.fog.color.set(0x0a1628);
+                ambient.intensity = 0.15;
+                sun.intensity = 0.1;
+                warmLight.intensity = 2.5;
+                warmLight.color.set(0xff8844);
+            } else {
+                scene.background = new THREE.Color(0x87CEEB);
+                scene.fog.color.set(0xE0F7FA);
+                ambient.intensity = 0.45;
+                sun.intensity = 1.4;
+                warmLight.intensity = 1.2;
+                warmLight.color.set(0xffaa55);
+            }
+        };
+
+        window.resetCamera = function() {
+            camera.position.set(18, 12, 22);
+            controls.target.set(0, 3, 0);
+        };
+
+        let flying = false;
+        let flyAngle = 0;
+        window.flyAround = function() {
+            flying = !flying;
+        };
+
+        // Keyboard movement
+        const keys = {};
+        window.addEventListener('keydown', e => keys[e.key.toLowerCase()] = true);
+        window.addEventListener('keyup', e => keys[e.key.toLowerCase()] = false);
+
+        function handleKeys() {
+            const speed = 0.15;
+            const dir = new THREE.Vector3();
+            camera.getWorldDirection(dir);
+            dir.y = 0;
+            dir.normalize();
+            const right = new THREE.Vector3().crossVectors(dir, new THREE.Vector3(0,1,0));
+
+            if (keys['w']) camera.position.addScaledVector(dir, speed);
+            if (keys['s']) camera.position.addScaledVector(dir, -speed);
+            if (keys['a']) camera.position.addScaledVector(right, -speed);
+            if (keys['d']) camera.position.addScaledVector(right, speed);
+            if (keys['q']) camera.position.y += speed;
+            if (keys['e']) camera.position.y -= speed;
+        }
+
+        // Animate
+        document.getElementById('loading').style.display = 'none';
+
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            handleKeys();
+
+            if (flying) {
+                flyAngle += 0.005;
+                camera.position.x = Math.cos(flyAngle) * 22;
+                camera.position.z = Math.sin(flyAngle) * 22;
+                camera.position.y = 10 + Math.sin(flyAngle * 2) * 2;
+                controls.target.set(0, 3, 0);
+            }
+
+            // Gentle house breathing / light pulse
+            warmLight.intensity = (isNight ? 2.2 : 1.0) + Math.sin(Date.now() * 0.002) * 0.2;
+
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
+</body>
+</html>
