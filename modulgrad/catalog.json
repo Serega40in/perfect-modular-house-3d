@@ -1,0 +1,26 @@
+{
+  "company": "ЛенКаркасМодуль",
+  "site": "https://lenkarkasmodul.shop",
+  "source_note": "Каталог из пользовательского архива. Перед коммерческим использованием сверить цены с сайтом компании.",
+  "production_days_formula": "max(25, 12 + 0.45 * area_m2)",
+  "install_on_site_days": 1,
+  "houses": [
+    {"lot":1,"name":"Мини-дом 6×2,5","size_m":[6,2.5],"area_m2":15,"frame_mm":50,"contour_rub":502065,"turnkey_rub":640651},
+    {"lot":2,"name":"Домик 6×3","size_m":[6,3],"area_m2":18,"frame_mm":100,"contour_rub":578519,"turnkey_rub":799986},
+    {"lot":3,"name":"Мини-дом с террасой 6×5,5","size_m":[6,5.5],"area_m2":18,"frame_mm":100,"extra":"терраса","contour_rub":668663,"turnkey_rub":1075804},
+    {"lot":4,"name":"Домик 7×3","size_m":[7,3],"area_m2":21,"frame_mm":100,"contour_rub":752486,"turnkey_rub":1209811},
+    {"lot":5,"name":"Домик 8×3","size_m":[8,3],"area_m2":24,"frame_mm":100,"contour_rub":775783,"turnkey_rub":1357505},
+    {"lot":6,"name":"Капучино 8×3","size_m":[8,3],"area_m2":24,"frame_mm":100,"contour_rub":851108,"turnkey_rub":1457817},
+    {"lot":7,"name":"Дом 6×5","size_m":[6,5],"area_m2":23,"frame_mm":100,"extra":"терраса","contour_rub":721734,"turnkey_rub":1272797},
+    {"lot":8,"name":"Барнхаус 6×5","size_m":[6,5],"area_m2":30,"frame_mm":150,"contour_rub":1031444,"turnkey_rub":1741744},
+    {"lot":9,"name":"Дом 6×6","size_m":[6,6],"area_m2":36,"frame_mm":150,"contour_rub":1158859,"turnkey_rub":1954160},
+    {"lot":10,"name":"Дом 6×8","size_m":[6,8],"area_m2":48,"frame_mm":150,"contour_rub":1277408,"turnkey_rub":2308668,"modules":2},
+    {"lot":11,"name":"Дом 6×9","size_m":[6,9],"area_m2":54,"frame_mm":150,"contour_rub":1541703,"turnkey_rub":2531048,"modules":2},
+    {"lot":12,"name":"Дом 7×9","size_m":[7,9],"area_m2":63,"frame_mm":150,"contour_rub":1779296,"turnkey_rub":3063696},
+    {"lot":13,"name":"Дом из Pinterest 6×8","size_m":[6,8],"area_m2":48,"frame_mm":150,"extra":"терраса","contour_rub":1448148,"turnkey_rub":2500747},
+    {"lot":14,"name":"Дом 7×9 со смещением","size_m":[7,9],"area_m2":36,"frame_mm":150,"extra":"дворик","contour_rub":1236561,"turnkey_rub":2260795},
+    {"lot":15,"name":"Дом 8×8 с террасой","size_m":[8,8],"area_m2":48,"frame_mm":150,"extra":"терраса 28 м²","contour_rub":1277408,"turnkey_rub":2619858},
+    {"lot":16,"name":"Дом 6×9,6","size_m":[6,9.6],"area_m2":58,"frame_mm":150,"contour_rub":1547294,"turnkey_rub":2902569},
+    {"lot":17,"name":"Барн 9×9","size_m":[9,9],"area_m2":81,"frame_mm":150,"contour_rub":2275269,"turnkey_rub":3901675}
+  ]
+}
