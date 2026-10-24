@@ -12,6 +12,9 @@
 <section id="myhomesPane" class="hidden"><p class="editor-intro">Ваши проекты и построенные дома сохраняются в этом браузере автоматически.</p><div class="saved-list" id="savedList"></div><button class="btn outline full" id="exportSave">Экспортировать сохранение</button><label class="btn outline full" style="display:block;text-align:center;cursor:pointer">Импортировать сохранение<input id="importSave" type="file" accept="application/json" style="display:none"></label></section></aside>
 <div class="tip glass">Перетащите сцену для обзора · колесо мыши — масштаб</div><div class="toast" id="toast"></div></main>
 <footer><div class="goal"><b id="goal">Задача: построить первый дом</b><small id="goalSub">Выберите проект или соберите собственный</small></div><div class="footer-actions"><button class="btn outline" id="viewToggle">▦ План 2D</button><button class="btn dark" id="footerBuild">Построить ↗</button></div></footer></div>
+<script type="importmap">
+{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"}}
+</script>
 <script type="module">
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
 import {OrbitControls} from 'https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/controls/OrbitControls.js';
